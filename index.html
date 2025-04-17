@@ -1,362 +1,209 @@
-<html>
-
+<!DOCTYPE html>
+<html lang="en">
 <head>
-    <style>
-        body {
+  <meta charset="UTF-8" />
+  <title>Dynamic Mate 365</title>
+  <style>
+    body {
+        font-family: "Segoe UI", "Segoe UI Web (West European)", -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", sans-serif !important;
+        font-size: small;
+        background: white;
+        margin: 0;
+        overflow: hidden;
+    }
 
-            * {
-                font-family: "Segoe UI", "Segoe UI Web (West European)", -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", sans-serif !important;
-                font-size: small;
+    *:focus,
+    *:focus-visible {
+        outline: unset !important;
+    }
 
-            }
+    .chat-toggle {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        width: 60px;
+        height: 60px;
+        background: black;
+        color: white;
+        font-size: 24px;
+        border: none;
+        border-radius: 50%;
+        cursor: pointer;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        transition: all 0.3s ease-in-out;
+    }
 
-            font-family: Arial,
-            sans-serif;
-            overflow: hidden;
-            background:white;
-            margin: 0;
-        }
+    .chat-toggle:hover {
+        background: #005A9E;
+    }
 
-        form {
-            margin: auto;
-        }
+    #bot-container {
+        width: 400px;
+        height: 700px; /* Increased height */
+        max-height: 90vh;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0px 0px 12px rgba(0, 0, 0, 0.1);
+        border-radius: 15px;
+        overflow: hidden;
+        margin: 20px auto;
+        background-color: white;
+    }
 
-        *:focus,
-        *:focus-visible {
-            outline: unset !important;
-        }
+    .bot-header {
+        background: rgb(2, 24, 56);
+        color: white;
+        padding: 12px 20px;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
 
-        .webchat__suggested-action {
-            border-radius: 8px !important;
-        }
+    .bot-messages {
+        flex: 1;
+        padding: 15px;
+        overflow-y: auto;
+        height: 100%;
+    }
 
-        .chat-toggle {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            width: 60px;
-            height: 60px;
-            background: #0078D4;
-            color: white;
-            font-size: 24px;
-            border: none;
-            border-radius: 50%;
-            cursor: pointer;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            transition: all 0.3s ease-in-out;
-        }
+    .bot-input {
+        display: flex;
+        align-items: center;
+        padding: 10px;
+        border-top: 1px solid #eee;
+        background: #f9f9f9;
+        width: 100%;
+        box-sizing: border-box;
+    }
 
-        .chat-toggle:hover {
-            background: #005A9E;
-        }
+    .bot-input input {
+        flex: 1;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        background: white;
+        color: black;
+        font-size: 16px;
+        margin-right: 10px;
+    }
 
+    .send-button {
+        background: #0078D4;
+        color: white;
+        border: none;
+        padding: 10px 15px;
+        border-radius: 50%;
+        cursor: pointer;
+        transition: all 0.2s ease-in-out;
+    }
 
+    .send-button:hover {
+        background: #005A9E;
+        transform: scale(1.1);
+    }
 
-        .bot-header {
-            background: rgb(2, 24, 56);
-            color: white;
-            padding: 12px 20px;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            border-top-left-radius: 15px;
-            border-top-right-radius: 15px;
-        }
+    /* Scrollbar Styling */
+    *::-webkit-scrollbar {
+        width: 12px;
+    }
 
+    *::-webkit-scrollbar-thumb {
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 10px;
+    }
 
-        .bot-messages {
-            flex: 1;
-            padding: 15px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            height: 425px;
-        }
+    /* Additional styles for suggested actions and bubbles */
+    .webchat__suggested-actions__button,
+    .ac-pushButton {
+        border-radius: 8px !important;
+        background-color: #e8ebec !important;
+        border: 1px solid #babfc3 !important;
+        color: black !important;
+    }
 
-        .bot-input {
-            display: flex;
-            align-items: center;
-            padding: 10px;
-            border-top: 1px solid rgba(255, 255, 255, 0.2);
-            background: rgba(255, 255, 255, 0.2);
-        }
+    .webchat__bubble.webchat__bubble--from-user .webchat__bubble__content {
+        background: hsl(217.33deg 100% 91.18%) !important;
+        color: black !important;
+    }
 
-        .bot-input input {
-            flex: 1;
-            padding: 10px;
-            border: none;
-            outline: none;
-            background: transparent;
-            color: black;
-            font-size: 16px;
-        }
+    .webchat__bubble:not(.webchat__bubble--from-user) .webchat__bubble__content {
+        background: white !important;
+        color: black !important;
+    }
 
-        .send-button {
-            background: #0078D4;
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 50%;
-            cursor: pointer;
-            transition: all 0.2s ease-in-out;
-        }
-
-        .send-button:hover {
-            background: #005A9E;
-            transform: scale(1.1);
-        }
-
-        .webchat__basic-transcript__filler {
-            display: none;
-        }
-
-        .viewer-toolbar>ul>li {
-            display: flex;
-        }
-
-        .webchat__basic-transcript__activity-indicator--focus {
-            border: unset !important;
-            outline: unset !important;
-
-        }
-
-        .webchat__suggested-actions:focus-within {
-            border: unset !important;
-            outline: unset !important;
-
-        }
-
-        .webchat__suggested-actions__button,
-        .ac-pushButton {
-            border-width: 1px !important;
-            color: black !important;
-            background-color: rgb(232 235 236) !important;
-            border-color: rgb(186 191 195) !important;
-        }
-
-        .webchat__send-box__main {
-            border-radius: 8px;
-            border-top: unset !important;
-        }
-
-        .webchat__bubble.webchat__bubble--from-user .webchat__bubble__content {
-            background: hsl(217.33deg 100% 91.18%) !important;
-            color: black !important;
-        }
-
-        .webchat__bubble:not(.webchat__bubble--from-user) .webchat__bubble__content {
-            background: white !important;
-            color: black !important;
-
-        }
-
-
-        .webchat__basic-transcript {
-            border-radius: 8px;
-            margin-bottom: 15px;
-        }
-
-        *::-webkit-scrollbar {
-            width: 18px;
-            height: 18px;
-        }
-
-        *::-webkit-scrollbar-corner {
-            background: transparent;
-        }
-
-        *::-webkit-scrollbar-thumb {
-            background: padding-box rgba(97, 97, 97, 0.43);
-            border-width: 6px;
-            border-style: solid;
-            border-color: transparent;
-            border-image: initial;
-        }
-
-        *::-webkit-scrollbar-thumb {
-            border: 6px solid transparent;
-            background: rgba(0, 0, 0, 0.2);
-            background: var(--palette-black-alpha-20, rgba(0, 0, 0, 0.43));
-            border-radius: 10px;
-            background-clip: padding-box;
-        }
-
-        .ac-pushButton {
-            border-radius: 8px;
-        }
-
-        select {
-            border-radius: 8px;
-        }
-
-        .react-film__filmstrip__item:nth-child(even) {
-            margin: 0px 10px;
-        }
-
-        .react-film__flipper__slider {
-            width: unset !important;
-        }
-
-        .webchat__typingIndicator {}
-
-        div[aria-label="Suggested actions"] {
-            margin-bottom: 10px !important;
-        }
-
-        .react-film__flipper__body {
-            background-color: rgb(2 24 56 / 73%) !important;
-            color: white !important;
-            line-height: 18px !important;
-        }
-    </style>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/viewerjs/1.11.7/viewer.css"
-        integrity="sha512-9NawOLzuLE2GD22PJ6IPWXEjPalb/FpdH1qMpgXdaDM+0OfxEV75ZCle6KhZi0vM6ZWvMrNnIZv6YnsL+keVmA=="
-        crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
-        integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg=="
-        crossorigin="anonymous" referrerpolicy="no-referrer" />
+</style>
+  <script src="https://cdn.botframework.com/botframework-webchat/latest/webchat.js"></script>
 </head>
-
-<body style="overflow-wrap: break-word;">
-    <div id="bot-container">
-        <!-- Chat Header -->
-        <div class="bot-header">
-            <span>Virtual Assistant</span>
-            <div>
-                <button class="close-btn " onclick="location.reload()"><i
-                        class="fa-solid fa-rotate-right fa-sm"></i></button>
-            </div>
-        </div>
-        <!-- Chat Messages -->
-        <div class="bot-messages" id="webchat"></div>
+<body>
+  <div id="bot-container">
+    <div class="bot-header">
+      <span>Dynamic Mate 365</span>
+      <button class="close-btn" onclick="location.reload()">
+        <i class="fa-solid fa-rotate-right fa-sm"></i>
+      </button>
     </div>
+    <div class="bot-messages" id="webchat"></div>
+  </div>
 
-    <script crossorigin="anonymous" src="https://cdn.botframework.com/botframework-webchat/latest/webchat.js"></script>
+  <script>
+    (async function () {
+      const styleOptions = {
+        bubbleBorderRadius: 12,
+        bubbleFromUserBorderRadius: 12,
+        hideUploadButton: false,
+        botAvatarInitials: 'DM',
+        userAvatarInitials: 'U',
+        backgroundColor: 'white'
+      };
 
-    <script>
-        function removeSuggestedActionsClass() {
-            const suggestedActions = document.querySelector(".webchat__suggested-actions");
-            if (suggestedActions) {
-                suggestedActions.classList.remove("webchat__suggested-actions");
-                console.log("Class 'webchat__suggested-actions' removed.");
-            }
-        }
+      const tokenEndpointURL = new URL('https://5744fe137c22e204b6d6bc6cd16bd6.5b.environment.api.powerplatform.com/powervirtualagents/botsbyschema/cr5dd_dynamics365GoogleSite/directline/token?api-version=2022-03-01-preview');
+      const locale = document.documentElement.lang || 'en';
+      const apiVersion = tokenEndpointURL.searchParams.get('api-version');
 
-        // Run this function every 100ms to continuously check and remove the class
-        setInterval(removeSuggestedActionsClass, 100);
-        (async function () {
-            setInterval(() => {
-                const images = document.querySelectorAll("img");
-                if (images.length > 0) {
-                    images.forEach(img => {
-                        if (!img.classList.contains('viewer-initialized')) {
-                            img.classList.add('viewer-initialized');
-                            img.addEventListener('click', () => {
-                                const viewer = new Viewer(img, {
-                                    toolbar: {
-                                        zoomIn: 1,
-                                        zoomOut: 1,
-                                        play: {
-                                            show: 1,
-                                            size: 'large',
-                                        }
-                                    }
-                                });
-                            });
-                        }
-                    });
-                }
-            }, 1000);
-            const styleOptions = {
-                bubbleBackground: "rgba(0, 120, 212, 0.1)",
-                bubbleFromUserBackground: "#0078D4",
-                bubbleFromUserTextColor: "white",
-                bubbleBorderRadius: 15,
-                bubbleFromUserBorderRadius: 15,
-                primaryFont: "Arial, sans-serif",
-                botAvatarImage: "https://via.placeholder.com/40",
-                userAvatarImage: "https://via.placeholder.com/40/0078D4/ffffff?text=U",
-                backgroundColor: "transparent"
-            };
-            const tokenEndpointURL = new URL('https://5744fe137c22e204b6d6bc6cd16bd6.5b.environment.api.powerplatform.com/powervirtualagents/botsbyschema/cr5dd_dynamics365GoogleSite/directline/token?api-version=2022-03-01-preview');
-            const locale = document.documentElement.lang || 'en';
-            const apiVersion = tokenEndpointURL.searchParams.get('api-version');
+      try {
+        const [directLineURL, token] = await Promise.all([
+          fetch(new URL(`/powervirtualagents/regionalchannelsettings?api-version=${apiVersion}`, tokenEndpointURL))
+            .then(r => r.json())
+            .then(({ channelUrlsById: { directline } }) => directline),
+          fetch(tokenEndpointURL).then(r => r.json()).then(({ token }) => token)
+        ]);
 
-            try {
-                const [directLineURL, token] = await Promise.all([
-                    fetch(new URL(`/powervirtualagents/regionalchannelsettings?api-version=${apiVersion}`, tokenEndpointURL))
-                        .then(response => {
-                            if (!response.ok) {
-                                throw new Error('Failed to retrieve regional channel settings.');
-                            }
-                            return response.json();
-                        })
-                        .then(({ channelUrlsById: { directline } }) => directline),
-                    fetch(tokenEndpointURL)
-                        .then(response => {
-                            if (!response.ok) {
-                                throw new Error('Failed to retrieve Direct Line token.');
-                            }
-                            return response.json();
-                        })
-                        .then(({ token }) => token)
-                ]);
-                
+        const directLine = WebChat.createDirectLine({
+          domain: new URL('v3/directline', directLineURL),
+          token
+        });
 
-                const store = WebChat.createStore({}, ({ dispatch }) => next => action => {
-                    if (action.type === 'DIRECT_LINE/CONNECT_FULFILLED') {
-                        dispatch({
-                            type: "WEB_CHAT/SEND_EVENT",
-                            payload: {
-                                name: "pvaSetContext",
-                                value: {
-                          
-                                }
-                            }
-                        });
-                    }
-                    return next(action);
-                });
+        const store = WebChat.createStore({}, ({ dispatch }) => next => action => {
+          if (action.type === 'DIRECT_LINE/CONNECT_FULFILLED') {
+            dispatch({
+              type: 'WEB_CHAT/SEND_EVENT',
+              payload: {
+                name: 'pvaSetContext',
+                value: {}
+              }
+            });
+          }
+          return next(action);
+        });
 
+        WebChat.renderWebChat(
+          {
+            directLine,
+            store,
+            locale,
+            styleOptions
+          },
+          document.getElementById('webchat')
+        );
+      } catch (error) {
+        console.error('Error initializing chat:', error);
+      }
+    })();
+  </script>
 
-
-                const directLine = WebChat.createDirectLine({ domain: new URL('v3/directline', directLineURL), token });
-
-                const subscription = directLine.connectionStatus$.subscribe({
-                    next(value) {
-                        if (value === 2) {
-                            directLine.postActivity({
-                                localTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-                                locale,
-                                name: 'startConversation',
-                                type: 'event'
-                            }).subscribe();
-                            subscription.unsubscribe();
-                        }
-                    }
-                });
-
-
-                WebChat.renderWebChat({ directLine, store, locale, styleOptions }, document.getElementById('webchat'));
-      
-    
-
-            } catch (error) {
-                console.error('Error initializing Web Chat:', error);
-            }
-        })();
-
-    </script>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/viewerjs/1.11.7/viewer.min.js"
-        integrity="sha512-lZD0JiwhtP4UkFD1mc96NiTZ14L7MjyX5Khk8PMxJszXMLvu7kjq1sp4bb0tcL6MY+/4sIuiUxubOqoueHrW4w=="
-        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/js/all.min.js"
-        integrity="sha512-b+nQTCdtTBIRIbraqNEwsjB6UvL3UEMkXnhzd8awtCYh0Kcsjl9uEgwVFVbhoj3uu1DO1ZMacNvLoyJJiNfcvg=="
-        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-
-
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/js/all.min.js"
+    integrity="sha512-b+nQTCdtTBIRIbraqNEwsjB6UvL3UEMkXnhzd8awtCYh0Kcsjl9uEgwVFVbhoj3uu1DO1ZMacNvLoyJJiNfcvg=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </body>
-
 </html>
