@@ -200,21 +200,6 @@
         console.error('Error initializing chat:', error);
       }
     })();
-    const subscription = directLine.connectionStatus$.subscribe({
-				next(value) {
-					if (value === 2) {
-						directLine
-							.postActivity({
-								localTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-								locale,
-								name: 'startConversation',
-								type: 'event'
-							})
-							.subscribe();
-						subscription.unsubscribe();
-					}
-				}
-			});
   </script>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/js/all.min.js"
