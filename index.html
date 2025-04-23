@@ -2,7 +2,7 @@
 
 <head>
     <style>
-   body {
+    body {
     font-family: 'Segoe UI', Roboto, Inter, sans-serif !important;
     font-size: 15px;
     background: white;
@@ -10,6 +10,7 @@
     overflow: hidden;
     color: #222;
 }
+    
         *:focus,
         *:focus-visible {
             outline: unset !important;
@@ -47,20 +48,7 @@
             margin: 20px auto;
             background-color: white;
         }
-            .close-btn {
-    background-color: rgb(2, 24, 56); /* match header */
-    border: none;
-    color: white;
-    padding: 6px 10px;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.2s ease-in-out;
-}
-
-.close-btn:hover {
-    background-color: #003366; /* slightly lighter for hover effect */
-}
-
+    
         .bot-header {
             background: rgb(2, 24, 56);
             color: white;
@@ -98,7 +86,20 @@
             font-size: 16px;
             margin-right: 10px;
         }
-    
+        .close-btn {
+    background-color: rgb(2, 24, 56); /* match header */
+    border: none;
+    color: white;
+    padding: 6px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.close-btn:hover {
+    background-color: #003366; /* slightly lighter for hover effect */
+}
+
     
         /* Scrollbar Styling */
         *::-webkit-scrollbar {
@@ -139,6 +140,7 @@
 </head>
 
 <body style="overflow-wrap: break-word;">
+    <input type="file" id="hiddenFileInput" accept="image/*" style="display:none;" />
     <div id="bot-container">
         <!-- Chat Header -->
         <div class="bot-header">
@@ -230,6 +232,35 @@
 
                 WebChat.renderWebChat({ directLine, store, locale, styleOptions }, document.getElementById('webchat'));
               
+                const observer = new MutationObserver(() => {
+    const uploadText = document.querySelector('[id="uploadedDocument"]');
+    if (uploadText && !uploadText.dataset.bound) {
+      uploadText.style.cursor = 'pointer';
+      uploadText.dataset.bound = 'true'; // prevent multiple bindings
+
+      uploadText.addEventListener('click', () => {
+        document.getElementById('hiddenFileInput').click();
+      });
+    }
+  });
+
+  // Observe changes in the chat container
+  observer.observe(document.getElementById('webchat'), {
+    childList: true,
+    subtree: true
+  });
+
+  // Optional: show filename once a file is selected
+  document.getElementById('hiddenFileInput').addEventListener('change', function () {
+    const fileName = this.files[0]?.name;
+    if (fileName) {
+      const uploadText = document.querySelector('[id="uploadedDocument"]');
+      if (uploadText) {
+        uploadText.textContent = fileName;
+      }
+    }
+  });
+
             
 
             } catch (error) {
