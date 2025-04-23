@@ -197,6 +197,35 @@
           },
           document.getElementById('webchat')
         );
+                       const observer = new MutationObserver(() => {
+    const uploadText = document.querySelector('[id="uploadedDocument"]');
+    if (uploadText && !uploadText.dataset.bound) {
+      uploadText.style.cursor = 'pointer';
+      uploadText.dataset.bound = 'true'; // prevent multiple bindings
+
+      uploadText.addEventListener('click', () => {
+        document.getElementById('hiddenFileInput').click();
+      });
+    }
+  });
+
+  // Observe changes in the chat container
+  observer.observe(document.getElementById('webchat'), {
+    childList: true,
+    subtree: true
+  });
+
+  // Optional: show filename once a file is selected
+  document.getElementById('hiddenFileInput').addEventListener('change', function () {
+    const fileName = this.files[0]?.name;
+    if (fileName) {
+      const uploadText = document.querySelector('[id="uploadedDocument"]');
+      if (uploadText) {
+        uploadText.textContent = fileName;
+      }
+    }
+  });
+
       } catch (error) {
         console.error('Error initializing chat:', error);
       }
