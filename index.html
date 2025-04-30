@@ -140,7 +140,7 @@
 </head>
 
 <body style="overflow-wrap: break-word;">
-    <input type="file" id="hiddenFileInput" accept="image/*" style="display:none;" />
+    <input type="file" id="hiddenFileInput" accept="pdf/*" style="display:none;" />
     <div id="bot-container">
         <!-- Chat Header -->
         <div class="bot-header">
@@ -158,6 +158,34 @@
 
     <script>
     
+let currentUser = {name:'', email:''};
+
+document.addEventListener("DOMContentLoaded", function () {
+            fetch("/_api/web/currentuser", {
+                method: "GET",
+                headers: {
+                    "Accept": "application/json;odata=verbose"
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                currentUser = {
+                    name: data.d.Title,
+                    email: data.d.Email
+                    };
+
+                console.log("Logged-in user:", currentUser);
+                initBot();
+            })
+            .catch(error => {
+                console.error("Error fetching user info:", error);
+                initBot(); 
+            });
+        });
+
+        function initBot() {
+
+
         (async function () {
        
             const styleOptions = {
@@ -203,7 +231,8 @@
                             payload: {
                                 name: "pvaSetContext",
                                 value: {
-                                    
+                                    SharePoint_LoggedinUserEmail: currentUser.email,
+                                    SharePoint_LoggedinUserEmail: currentUser.name
                                 }
                             }
                         });
@@ -232,7 +261,7 @@
 
                 WebChat.renderWebChat({ directLine, store, locale, styleOptions }, document.getElementById('webchat'));
               
-                const observer = new MutationObserver(() => {
+  const observer = new MutationObserver(() => {
     const uploadText = document.querySelector('[id="uploadedDocument"]');
     if (uploadText && !uploadText.dataset.bound) {
       uploadText.style.cursor = 'pointer';
@@ -251,15 +280,34 @@
   });
 
   // Optional: show filename once a file is selected
-  document.getElementById('hiddenFileInput').addEventListener('change', function () {
-    const fileName = this.files[0]?.name;
-    if (fileName) {
-      const uploadText = document.querySelector('[id="uploadedDocument"]');
-      if (uploadText) {
-        uploadText.textContent = fileName;
-      }
+  document.getElementById('hiddenFileInput').addEventListener('change', function (event) {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            const base64Image = e.target.result;
+
+            // Find the Input.Text inside the Adaptive Card
+            const hiddenInput = document.querySelector('[id="uploadedFileContent"]');
+        
+
+            if (hiddenInput) {
+                hiddenInput.setAttribute('value', base64Image); // <-- important!
+                hiddenInput.dispatchEvent(new Event('input', { bubbles: true })); // <-- important to trigger update
+
+            }
+
+            // Update UI label to show file name
+            const label = document.querySelector('[id="uploadedDocument"]');
+            if (label) {
+                label.textContent = `📎 ${file.name}`;
+            }
+        };
+        reader.readAsDataURL(file);
     }
-  });
+});
+
+
 
             
 
@@ -267,7 +315,7 @@
                 console.error('Error initializing Web Chat:', error);
             }
         })();
-
+    }
     </script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/viewerjs/1.11.7/viewer.min.js"
@@ -276,6 +324,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/js/all.min.js"
         integrity="sha512-b+nQTCdtTBIRIbraqNEwsjB6UvL3UEMkXnhzd8awtCYh0Kcsjl9uEgwVFVbhoj3uu1DO1ZMacNvLoyJJiNfcvg=="
         crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+        <script src="https://unpkg.com/adaptivecards-templating/dist/adaptivecards-templating.min.js"></script>
 
 
 </body>
