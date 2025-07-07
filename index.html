@@ -169,7 +169,8 @@
                 primaryFont: "Arial, sans-serif",
                 botAvatarImage: "https://via.placeholder.com/40",
                 userAvatarImage: "https://via.placeholder.com/40/0078D4/ffffff?text=U",
-                backgroundColor: "transparent"
+                backgroundColor: "transparent",
+                hideUploadButton: true
             };
             const tokenEndpointURL = new URL('https://5744fe137c22e204b6d6bc6cd16bd6.5b.environment.api.powerplatform.com/powervirtualagents/botsbyschema/cr5dd_dynamics365GoogleSite/directline/token?api-version=2022-03-01-preview');
             const locale = document.documentElement.lang || 'en';
@@ -261,12 +262,10 @@
             // Find the Input.Text inside the Adaptive Card
             const hiddenInput = document.querySelector('[id="uploadedFileContent"]');
         
+
             if (hiddenInput) {
                 hiddenInput.setAttribute('value', base64Image); // <-- important!
                 hiddenInput.dispatchEvent(new Event('input', { bubbles: true })); // <-- important to trigger update
-                 const textarea = document.querySelector(".ac-input-container .ac-textInput");
-                 textarea.value = base64Image;
-
 
             }
 
