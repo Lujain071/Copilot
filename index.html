@@ -204,8 +204,26 @@
                         })
                         .then(({ token }) => token)
                 ]);
+          window.parent.postMessage("getUserInfo", "*");
 
+window.addEventListener("message", function (event) {
+    if (event.data?.type === "userInfo") {
+        const userInfo = event.data.data;
+        console.log("User info received:", userInfo);
 
+        // Send the info to Copilot
+        store.dispatch({
+            type: "WEB_CHAT/SEND_EVENT",
+            payload: {
+                name: "pvaSetContext",
+                value: {
+                    userDisplayName: userInfo.displayName,
+                    userLoginName: userInfo.loginName
+                }
+            }
+        });
+    }
+});
                 const store = WebChat.createStore({}, ({ dispatch }) => next => action => {
                     if (action.type === 'DIRECT_LINE/CONNECT_FULFILLED') {
                         dispatch({
@@ -291,7 +309,7 @@
                 const monitorSubmitButton = () => {
                     const buttons = document.querySelectorAll('button.ac-pushButton');
                     buttons.forEach(button => {
-                        if (button.innerText.trim() === "Submit" && !button.dataset.bound) {
+                        if (button.innerText.trim() === "Add" && !button.dataset.bound) {
                             button.disabled = true;
                             button.style.opacity = "0.5";
                             button.dataset.bound = "true";
