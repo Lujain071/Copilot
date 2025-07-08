@@ -204,26 +204,8 @@
                         })
                         .then(({ token }) => token)
                 ]);
-          window.parent.postMessage("getUserInfo", "*");
 
-window.addEventListener("message", function (event) {
-    if (event.data?.type === "userInfo") {
-        const userInfo = event.data.data;
-        console.log("User info received:", userInfo);
 
-        // Send the info to Copilot
-        store.dispatch({
-            type: "WEB_CHAT/SEND_EVENT",
-            payload: {
-                name: "pvaSetContext",
-                value: {
-                    userDisplayName: userInfo.displayName,
-                    userLoginName: userInfo.loginName
-                }
-            }
-        });
-    }
-});
                 const store = WebChat.createStore({}, ({ dispatch }) => next => action => {
                     if (action.type === 'DIRECT_LINE/CONNECT_FULFILLED') {
                         dispatch({
