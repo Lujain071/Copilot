@@ -241,84 +241,93 @@
 
 
                 WebChat.renderWebChat({ directLine, store, locale, styleOptions }, document.getElementById('webchat'));
-                // observer to detect file upload placeholder 
-                const observer = new MutationObserver(() => {
-                    const uploadText = document.querySelector('[id="uploadedDocument"]');
-                    if (uploadText && !uploadText.dataset.bound) {
-                        uploadText.style.cursor = 'pointer';
-                        uploadText.dataset.bound = 'true';
 
-                        uploadText.addEventListener('click', () => {
-                            document.getElementById('hiddenFileInput').click();
-                        });
-                    }
-                });
 
-                // Observe changes in the chat container
-                observer.observe(document.getElementById('webchat'), {
-                    childList: true,
-                    subtree: true
-                });
 
-                // show filename once a file is selected
-                document.getElementById('hiddenFileInput').addEventListener('change', function (event) {
-                    const file = event.target.files[0];
-                    if (file) {
-                        const reader = new FileReader();
-                        reader.onload = function (e) {
-                            const base64Image = e.target.result;
+  WebChat.renderWebChat({ directLine, store, locale, styleOptions }, document.getElementById('webchat'));
 
-                            // Find the Input.Text inside the Adaptive Card
-                            const hiddenInput = document.querySelector('[id="uploadedFileContent"]');
+        // Handle "Click here to upload" binding for every new uploadedDocument element
+        const monitorUploadClick = () => {
+          document.querySelectorAll('[id="uploadedDocument"]').forEach(el => {
+            if (!el.dataset.bound) {
+              el.style.cursor = 'pointer';
+              el.dataset.bound = 'true';
+              el.addEventListener('click', () => {
+                document.getElementById('hiddenFileInput').click();
+              });
+            }
+          });
+        };
 
-                            if (hiddenInput) {
-                                hiddenInput.setAttribute('value', base64Image); // <-- important!
-                                hiddenInput.dispatchEvent(new Event('input', { bubbles: true })); // <-- important to trigger update
-                                const textarea = document.querySelector(".ac-input-container .ac-textInput");
-                                textarea.value = base64Image;
-                            }
+        // Disable and enable the Add button properly on each render
+        const monitorSubmitButton = () => {
+          document.querySelectorAll('button.ac-pushButton').forEach(button => {
+            if (button.innerText.trim() === "Add" && !button.dataset.bound) {
+              button.disabled = true;
+              button.style.opacity = "0.5";
+              button.dataset.bound = "true";
 
-                            // Update UI label to show file name
-                            const label = document.querySelector('[id="uploadedDocument"]');
-                            if (label) {
-                                label.textContent = `📎 ${file.name}`;
-                            }
-                        };
-                        reader.readAsDataURL(file);
-                    }
-                });
-         //Disalbe Submit button Logic
-                const monitorSubmitButton = () => {
-                    const buttons = document.querySelectorAll('button.ac-pushButton');
-                    buttons.forEach(button => {
-                        if (button.innerText.trim() === "Add" && !button.dataset.bound) {
-                            button.disabled = true;
-                            button.style.opacity = "0.5";
-                            button.dataset.bound = "true";
+              const fileInput = document.getElementById('hiddenFileInput');
+              fileInput.addEventListener('change', function () {
+                if (fileInput.files.length > 0) {
+                  button.disabled = false;
+                  button.style.opacity = "1";
+                }
+              });
+            }
+          });
+        };
 
-                            const fileInput = document.getElementById('hiddenFileInput');
-
-                            fileInput.addEventListener('change', function (event) {
-                                const file = event.target.files[0];
-                                if (file) {
-                                    button.disabled = false;
-                                    button.style.opacity = "1";
-                                }
-                            });
-                        }
-                    });
-                };
-
-        const buttonObserver = new MutationObserver(monitorSubmitButton);
-buttonObserver.observe(document.getElementById('webchat'), {
-            childList: true,
-            subtree: true
+        // Mutation observer for any new messages/elements added to the webchat container
+        const observer = new MutationObserver(() => {
+          monitorUploadClick();
+          monitorSubmitButton();
         });
 
-            } catch (error) {
-                console.error('Error initializing Web Chat:', error);
-            }
-        })();
+        observer.observe(document.getElementById('webchat'), {
+          childList: true,
+          subtree: true
+        });
+
+        // Update Adaptive Card input and label with selected file base64 and filename
+        document.getElementById('hiddenFileInput').addEventListener('change', function (event) {
+          const file = event.target.files[0];
+          if (file) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+              const base64Image = e.target.result;
+
+              const hiddenInput = document.querySelector('[id="uploadedFileContent"]');
+              if (hiddenInput) {
+                hiddenInput.setAttribute('value', base64Image);
+                hiddenInput.dispatchEvent(new Event('input', { bubbles: true }));
+              }
+
+              // ✅ Select all matching textareas each time
+              const allTextareas = document.querySelectorAll(".ac-input-container .ac-textInput");
+              allTextareas.forEach(textarea => {
+                textarea.value = base64Image;
+              });
+
+              // Update all upload labels with file name
+              document.querySelectorAll('[id="uploadedDocument"]').forEach(label => {
+                label.textContent = `📎 ${file.name}`;
+              });
+            };
+            reader.readAsDataURL(file);
+          }
+        });
+
+      } catch (error) {
+        console.error('Error initializing Web Chat:', error);
+      }
+    })();
+
+
+
+
+
+
 
     </script>
 
